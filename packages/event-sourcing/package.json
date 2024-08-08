@@ -1,0 +1,56 @@
+{
+  "name": "@jpowersdev/event-sourcing",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "An Event-Sourcing implementation",
+  "homepage": "https://github.com/jpowersdev/effect-sandbox",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpowersdev/effect-sandbox",
+    "directory": "packages/event-sourcing"
+  },
+  "bugs": {
+    "url": "https://github.com/Effect-TS/effect/issues"
+  },
+  "tags": [
+    "typescript",
+    "observability",
+    "database"
+  ],
+  "keywords": [
+    "typescript",
+    "observability",
+    "database"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist",
+    "provenance": true
+  },
+  "scripts": {
+    "codegen": "build-utils prepare-v2",
+    "build": "pnpm build-esm && pnpm build-cjs && pnpm build-annotate && build-utils pack-v2",
+    "build-esm": "tsc -b tsconfig.build.json",
+    "build-cjs": "babel build/esm --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir build/cjs --source-maps",
+    "build-annotate": "babel build --plugins annotate-pure-calls --out-dir build --source-maps",
+    "check": "tsc -b tsconfig.json",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "@effect/platform": "latest",
+    "@effect/schema": "latest",
+    "@effect/sql": "latest",
+    "effect": "latest"
+  },
+  "peerDependencies": {
+    "@effect/platform": "latest",
+    "@effect/schema": "latest",
+    "@effect/sql": "latest",
+    "effect": "latest"
+  },
+  "dependencies": {
+    "@opentelemetry/semantic-conventions": "^1.24.1"
+  }
+}
