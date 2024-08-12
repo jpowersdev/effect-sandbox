@@ -3,7 +3,7 @@ import { Data, Equal, Hash, Inspectable, Predicate } from "effect"
 import { pipe } from "effect/Function"
 import * as Stream from "effect/Stream"
 
-const VersionSymbolKey = "@effect/event-sourcing/Version"
+const VersionSymbolKey = "@jpowersdev/event-sourcing/Version"
 
 export const TypeId: unique symbol = Symbol.for(VersionSymbolKey)
 
@@ -42,7 +42,7 @@ export const Proto: Version = Data.unsafeStruct({
   },
   toJSON(this: Version) {
     return {
-      _id: "@effect/event-sourcing/Version",
+      _id: "@jpowersdev/event-sourcing/Version",
       version: this.version
     }
   },

@@ -1,5 +1,5 @@
 import { Schema } from "@effect/schema"
-import { Chunk, Clock, Context, Effect, Equal, flow, Number, Option, pipe, Sink, STM, Stream, TMap } from "effect"
+import { Chunk, Context, Effect, Equal, flow, Number, Option, pipe, STM, TMap } from "effect"
 import type { Event } from "./Event.js"
 import type { EventStore } from "./EventStore.js"
 import { type EventStream, toEventStream } from "./EventStream.js"
@@ -12,17 +12,13 @@ export class ConcurrentModificationException
 {
 }
 
-export interface InMemoryEventStore<ES extends EventStream.Any> extends EventStore<Chunk.Chunk<Event<ES>>, ES> {
+export interface InMemoryEventStore<ES extends EventStream.Any> extends EventStore<ES> {
 }
 
 export const InMemoryEventStore = <ES extends EventStream.Any>() =>
   Context.GenericTag<InMemoryEventStore<ES>>(
-    "@effect/event-sourcing/InMemoryEventStore"
+    "@jpowersdev/event-sourcing/InMemoryEventStore"
   )
-
-export declare namespace InMemoryEventStore {
-  export type State<ES extends EventStream.Any> = Chunk.Chunk<Event<ES>>
-}
 
 export const make = <ES extends EventStream.Any>(): Effect.Effect<
   InMemoryEventStore<ES>
@@ -30,7 +26,7 @@ export const make = <ES extends EventStream.Any>(): Effect.Effect<
   Effect.gen(function*() {
     const store = yield* TMap.make<
       EventStream.StreamId<ES>,
-      InMemoryEventStore.State<ES>
+      ES
     >()
 
     const lastVersionFor = (
@@ -66,46 +62,43 @@ export const make = <ES extends EventStream.Any>(): Effect.Effect<
 
     const persist = (
       streamId: EventStream.StreamId<ES>,
-      events: Chunk.Chunk<EventStream.Payload<ES>>,
+      events: ES,
       expectedVersion: Option.Option<Version.Version>
     ): Effect.Effect<ES, ConcurrentModificationException> =>
       STM.gen(function*() {
         const lastVersion = yield* lastVersionFor(streamId, expectedVersion)
         const now = Date.now()
 
-        const nextEvents = toEventStream(events, streamId, lastVersion, now)
-
-        readStream(streamId) + 
-
-        return yield* pipe(
+        yield* pipe(
           TMap.updateWith(
             store,
             streamId,
             Option.match({
               onSome: (current) =>
                 Option.some(
-                  Chunk.appendAll(current, nextEvents.events)
+                  Chunk.appendAll(current, events)
                 ),
-              onNone: () => Option.some(nextEvents.events)
+              onNone: () => Option.some(events)
             })
-          ),
-          STM.zipRight(
-            STM.succeed(nextEvents)
           )
         )
+
+        const nextEvents = toEventStream(events, streamId, lastVersion, now)
+
+        return yield* STM.succeed(nextEvents)
       }).pipe(
         STM.commit,
         Effect.withSpan("InMemoryEventStore.persist")
       )
 
-    const readStream = (streamId: EventStream.StreamId<ES>): STM.STM<Chunk.Chunk<Event<ES>>> =>
+    const readStream = (streamId: EventStream.StreamId<ES>): STM.STM<ES> =>
       TMap.getOrElse(store, streamId, () => Chunk.empty<Event<ES>>())
 
     const read = (
       streamId: EventStream.StreamId<ES>,
       fromVersion: Version.Version,
       maxCount: number
-    ): Effect.Effect<Chunk.Chunk<Event<ES>>> =>
+    ): Effect.Effect<ES> =>
       pipe(
         Number.max(fromVersion.version - 1, 0),
         (startIndex) =>

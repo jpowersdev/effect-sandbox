@@ -3,22 +3,20 @@ import type { EventStream } from "./EventStream.js"
 import type { ConcurrentModificationException } from "./InMemoryEventStore.js"
 import type { Version } from "./Version.js"
 
-export interface EventStore<A, ES extends EventStream.Any> extends EventStreamReader<A, ES>, EventStreamWriter<A, ES> {
+export interface EventStore<ES extends EventStream.Any> extends EventStreamReader<ES>, EventStreamWriter<ES> {
 }
 
 export interface EventStreamReader<
-  A,
   ES extends EventStream.Any
 > {
   read: (
     streamId: EventStream.StreamId<ES>,
     fromVersion: Version,
     maxCount: number
-  ) => Effect.Effect<A>
+  ) => Effect.Effect<ES>
 }
 
 export interface EventStreamWriter<
-  A,
   ES extends EventStream.Any
 > {
   persist: (
@@ -27,5 +25,5 @@ export interface EventStreamWriter<
       EventStream.Payload<ES>
     >,
     expectedVersion: Option.Option<Version>
-  ) => Effect.Effect<A, ConcurrentModificationException>
+  ) => Effect.Effect<ES, ConcurrentModificationException>
 }

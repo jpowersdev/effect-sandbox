@@ -1,4 +1,4 @@
-import * as Version from "@effect/event-sourcing/Version"
+import * as Version from "@jpowersdev/event-sourcing/Version"
 import * as it from "@effect/vitest"
 import { Effect, Equal, Stream } from "effect"
 import * as assert from "node:assert"

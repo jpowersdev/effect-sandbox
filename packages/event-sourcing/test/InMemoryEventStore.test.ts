@@ -1,4 +1,4 @@
-import * as InMemoryEventStore from "@effect/event-sourcing/InMemoryEventStore"
+import * as InMemoryEventStore from "@jpowersdev/event-sourcing/InMemoryEventStore"
 import { Schema } from "@effect/schema"
 import * as it from "@effect/vitest"
 import {

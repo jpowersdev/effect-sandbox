@@ -1,7 +1,7 @@
 import { Data } from "effect"
 import type { Version } from "./Version.js"
 
-export const TypeId: unique symbol = Symbol.for("@effect/event-sourcing/Aggregate")
+export const TypeId: unique symbol = Symbol.for("@jpowersdev/event-sourcing/Aggregate")
 
 export type TypeId = typeof TypeId
 
